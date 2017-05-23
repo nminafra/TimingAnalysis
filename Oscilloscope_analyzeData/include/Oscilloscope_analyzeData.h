@@ -675,11 +675,10 @@ class Oscilloscope_analyzeData : public pulse
     }
     
     
-    
     //empty
     void finalize();
 
-
+    
   private :
 
     //clock

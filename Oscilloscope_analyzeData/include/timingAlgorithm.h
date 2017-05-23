@@ -229,7 +229,6 @@ double PreProcess(std::vector<double>& time, std::vector<double>& data, Algorith
   
   }
   
-  
   baseline=.0;
   baseline_rms=.0;
   for (uint i= 0; i<baseline_nOfP; ++i) {

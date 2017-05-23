@@ -15,9 +15,9 @@ src/pulse.o: src/pulse.cxx include/pulse.h
 	$(CC) $(SOFLAGS) $(CFLAGS) -c -o $@ $< $(ROOT) $(INS)
 
 objects=Oscilloscope_analyzeData.o pulse.o
-f_0_objects=$(objects:%=src/%)
+f_0_objects=$(objects:%=src/%) 
 
-Oscilloscope_analyzeData.a:$(f_0_objects)
+Oscilloscope_analyzeData.a:$(f_0_objects) include/Oscilloscope_analyzeData.h include/pulse.h
 	ar -r $@ $(f_0_objects)
 
 .cxx.o:

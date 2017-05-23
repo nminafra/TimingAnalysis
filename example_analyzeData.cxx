@@ -18,10 +18,10 @@ int main (int argc, char** argv)
   ("cfd_threshold,c", po::value<double>()->default_value(0.4), "CFD fraction")
   ("threshold_ch1,t", po::value<double>()->default_value(-0.1), "Threshold for ch 1, negative for negative signals (V)")
   ("threshold_ch2,w", po::value<double>()->default_value(-0.1), "Threshold for ch 2, negative for negative signals (V)")
-  ("lowpass,f", po::value<double>()->default_value(0), "Lowpass filter frequency (Hz)")
-  ("hysteresis,h", po::value<double>()->default_value(3e-3), "Hysteresis for the discriminator (V)")
-  ("treename,t", po::value<std::string>()->default_value("pulse"), "Name of the TTree")
-  ("outputdir,o", po::value<std::string>()->default_value("~/Work/public/Fermilab/Results"), "output directory")
+  ("lowpass,p", po::value<double>()->default_value(0), "Lowpass filter frequency (Hz)")
+  ("hysteresis,h", po::value<double>()->default_value(1e-3), "Hysteresis for the discriminator (V)")
+  ("treename,n", po::value<std::string>()->default_value("pulse"), "Name of the TTree")
+  ("outputdir,o", po::value<std::string>()->default_value("./Results"), "output directory")
   ("filename,i", po::value<std::string>(), "input file");
   
   po::positional_options_description positionalOptions; 

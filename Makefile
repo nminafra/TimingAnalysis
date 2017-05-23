@@ -8,7 +8,7 @@ progs=$(LIB_DIRECTORY)/$(LIB_NAME).a example_analyzeData
 
 all:$(progs)
 
-$(LIB_DIRECTORY)/$(LIB_NAME).a: $(objects:%=$(LIB_DIRECTORY)/src/%)
+$(LIB_DIRECTORY)/$(LIB_NAME).a: $(objects:%=$(LIB_DIRECTORY)/src/%) $(LIB_DIRECTORY)/include/timingAlgorithm.h
 	$(MAKE) -C $(LIB_DIRECTORY)
 
 example_analyzeData:%:%.cxx $(CHECKFORUPDATE) 
