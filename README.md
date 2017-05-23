@@ -9,7 +9,7 @@ $> ./example_analyzeData --help
   -h [ --help ]                         produce help message
   -f [ --firstchannel ] arg (=0)        First channel to analyze
   -s [ --secondchannel ] arg (=1)       Second channel to analyze
-  -c [ --cfd_threshold ] arg (=0.40000000000000002)
+  -c [ --cfd_threshold ] arg (=0.40000000000000002) 
                                         CFD fraction
   -t [ --threshold_ch1 ] arg (=-0.10000000000000001)
                                         Threshold for ch 1, negative for 
