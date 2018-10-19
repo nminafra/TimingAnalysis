@@ -32,6 +32,8 @@ int main (int argc, char** argv)
         std::cout << "-h [ --help ]                         produce help message" << std::endl;
         std::cout << "-f [ --channel ] arg (=0)             channel to analyze" << std::endl;
         std::cout << "-c [ --cfd_threshold ] arg (=0.4)     CFD fraction" << std::endl;
+        std::cout << "                                      a negative value will start a scan with" << std::endl;
+        std::cout << "                                      a step equal to |cfd_threshold|" << std::endl;
         std::cout << "-t [ --threshold ] arg (=-0.1)        Threshold, negative for" << std::endl;
         std::cout << "                                      negative signals (V)" << std::endl;
         std::cout << "-p [ --lowpass ] arg (=0)             Lowpass filter frequency (Hz)" << std::endl;
