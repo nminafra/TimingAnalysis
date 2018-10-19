@@ -163,22 +163,19 @@ class TimingAnalysis : public pulse
       double ch1_baselineRms = .0;
       double ch2_baselineRms = .0;
 
-      double minPulseHeight=0.01;
-      double maxPulseHeight=0.08;
-
       // Histo declaration, create new for a new file
       TH1D h_deltat_SimpleThreshold("h_deltat_SimpleThreshold","h_deltat_SimpleThreshold",2000,-10e-9,10e-9);
       TH1D h_deltat_Smart("h_deltat_Smart","h_deltat_Smart",2000,-10e-9,10e-9);
       TH1D h_TimeFromReference_Det0("h_TimeFromReference_Det0","h_TimeFromReference_Det0",1000,-10e-9,10e-9);
       TH1D h_TimeFromReference_Det1("h_TimeFromReference_Det1","h_TimeFromReference_Det1",1000,-10e-9,10e-9);
 
-      TH1D h_max_Det0("h_max_Det0","h_max_Det0",200,0,2*maxPulseHeight);
-      TH1D h_max_Det1("h_max_Det1","h_max_Det1",200,0,2*maxPulseHeight);
-      TH1D h_max_selected_Det0("h_max_selected_Det0","h_max_selected_Det0",200,0,2*maxPulseHeight);
-      TH1D h_max_selected_Det1("h_max_selected_Det1","h_max_selected_Det1",200,0,2*maxPulseHeight);
+      TH1D h_max_Det0("h_max_Det0","h_max_Det0",200,0,2*parameters.rangeMax_ch0);
+      TH1D h_max_Det1("h_max_Det1","h_max_Det1",200,0,2*parameters.rangeMax_ch1);
+      TH1D h_max_selected_Det0("h_max_selected_Det0","h_max_selected_Det0",50,0,1.2*parameters.rangeMax_ch0);
+      TH1D h_max_selected_Det1("h_max_selected_Det1","h_max_selected_Det1",50,0,1.2*parameters.rangeMax_ch1);
       TH1D h_charge_selected_Det0("h_charge_selected_Det0","h_charge_selected_Det0",100,0,20);
-      TH1D h_baseline_Det0("h_baseline_Det0","h_baseline_Det0",200,-3*minPulseHeight,3*minPulseHeight);
-      TH1D h_baseline_Det1("h_baseline_Det1","h_baseline_Det1",200,-3*minPulseHeight,3*minPulseHeight);
+      TH1D h_baseline_Det0("h_baseline_Det0","h_baseline_Det0",200,-0.01,0.01);
+      TH1D h_baseline_Det1("h_baseline_Det1","h_baseline_Det1",200,-0.01,0.01);
       TH1D h_pedestal_Det0("h_pedestal_Det0","h_pedestal_Det0",1000,-0.1,0.1);
       TH1D h_pedestal_Det1("h_pedestal_Det1","h_pedestal_Det1",1000,-0.1,0.1);
       TH1D h_SNR_Det0("h_SNR_Det0","h_SNR_Det0",150,0,150);
@@ -193,9 +190,9 @@ class TimingAnalysis : public pulse
 
       int numOfBinX = 9;
       int numOfBinY = 9;
-      TH2D bidimHistogram("bidimHistogram","bidimHistogram",numOfBinX,minPulseHeight,maxPulseHeight,numOfBinY,minPulseHeight,maxPulseHeight);
-      TH2D bidimHistogramRMS("bidimHistogramRMS","bidimHistogramRMS",numOfBinX,minPulseHeight,maxPulseHeight,numOfBinY,minPulseHeight,maxPulseHeight);
-      TH2I bidimHistogramN("bidimHistogramN","bidimHistogramN",numOfBinX,minPulseHeight,maxPulseHeight,numOfBinY,minPulseHeight,maxPulseHeight);
+      TH2D bidimHistogram("bidimHistogram","bidimHistogram",numOfBinX,parameters.rangeMin_ch0,parameters.rangeMax_ch0,numOfBinY,parameters.rangeMin_ch1,parameters.rangeMax_ch1);
+      TH2D bidimHistogramRMS("bidimHistogramRMS","bidimHistogramRMS",numOfBinX,parameters.rangeMin_ch0,parameters.rangeMax_ch0,numOfBinY,parameters.rangeMin_ch1,parameters.rangeMax_ch1);
+      TH2I bidimHistogramN("bidimHistogramN","bidimHistogramN",numOfBinX,parameters.rangeMin_ch0,parameters.rangeMax_ch0,numOfBinY,parameters.rangeMin_ch1,parameters.rangeMax_ch1);
       TH1DptrVec_t bidimHistogramVec(bidimHistogram.GetNbinsX()*bidimHistogram.GetNbinsY());
       std::cout<<"bins: "<<bidimHistogram.GetNbinsX()*bidimHistogram.GetNbinsY()<<std::endl;
       for(int itx=0; itx<bidimHistogramVec.size(); ++itx) {
@@ -258,7 +255,7 @@ class TimingAnalysis : public pulse
       	fChain->GetEntry(jentry++);
 
       	eventCounter=i_evt;
-      	if (eventCounter%1000==0) {
+      	if (eventCounter%1000==0  && eventCounter>0) {
       	  TF1 gausDt_tmp("gausDt_tmp","gaus",h_deltat_Smart.GetMean() - 2*h_deltat_Smart.GetRMS(),h_deltat_Smart.GetMean() + 2*h_deltat_Smart.GetRMS());
       	  h_deltat_Smart.Fit(&gausDt_tmp,"RFQ");
       	  std::cout<<"Processing event number "<<eventCounter<<"\t"<< parameters.found <<" found \tRMS: "<<h_deltat_Smart.GetRMS()<<"\tsigma:\t" << gausDt_tmp.GetParameter(2)<<std::endl;
@@ -424,8 +421,6 @@ class TimingAnalysis : public pulse
         g_correctedY.Write();
         g_channels_corrlations.Write();
 
-        TF1* flin= new TF1("flin","pol2",minPulseHeight,maxPulseHeight);
-
         for(int itx=0; itx<bidimHistogramVec.size(); ++itx) {
         	bidimHistogramVec.at(itx)->Delete();
         }
@@ -433,24 +428,31 @@ class TimingAnalysis : public pulse
         // Normalize all histograms
         h_deltat_SimpleThreshold.Scale(1./h_deltat_SimpleThreshold.GetMaximum(),"nosw2");
         h_deltat_Smart.Scale(1./h_deltat_Smart.GetMaximum(),"nosw2");
-  //       h_TimeFromReference_Det0.Scale(1./h_TimeFromReference_Det0.GetMaximum(),"nosw2");
-  //       h_TimeFromReference_Det1.Scale(1./h_TimeFromReference_Det1.GetMaximum(),"nosw2");
+        h_TimeFromReference_Det0.Scale(1./h_TimeFromReference_Det0.GetMaximum(),"nosw2");
+        h_TimeFromReference_Det1.Scale(1./h_TimeFromReference_Det1.GetMaximum(),"nosw2");
 
         h_pedestal_Det0.Scale(1./h_pedestal_Det0.GetMaximum(),"nosw2");
         h_pedestal_Det1.Scale(1./h_pedestal_Det1.GetMaximum(),"nosw2");
-  //       h_max_Det0.Scale(1./h_max_selected_Det0.GetMaximum(),"nosw2");
-  //       h_max_Det1.Scale(1./h_max_selected_Det1.GetMaximum(),"nosw2");
+        h_max_Det0.Scale(1./h_max_selected_Det0.GetMaximum(),"nosw2");
+        h_max_Det1.Scale(1./h_max_selected_Det1.GetMaximum(),"nosw2");
         h_max_selected_Det0.Scale(1./h_max_selected_Det0.GetMaximum(),"nosw2");
-        TF1* langau = new TF1("langau",langaufun,0.01,0.2,4);
+        h_max_selected_Det1.Scale(1./h_max_selected_Det1.GetMaximum(),"nosw2");
+
+        TF1* langau = new TF1("langau",langaufun,parameters.rangeMin_ch0,parameters.rangeMax_ch0,4);
         langau->SetNpx(10000);
         langau->SetParNames("Width","MP","Area","GSigma");
-        langau->SetParameters(0.04,0.4,50,h_pedestal_Det0.GetRMS());
-        langau->SetRange(0.04,0.4);
+        langau->SetParameters(0.05*parameters.rangeMax_ch0,0.25*parameters.rangeMax_ch0,50,h_pedestal_Det0.GetRMS());
+        langau->SetRange(parameters.rangeMin_ch0,parameters.rangeMax_ch0);
   //       langau->FixParameter(3,h_pedestal_Det0.GetRMS());
-        h_max_selected_Det0.Fit(langau,"R");
+        h_max_selected_Det0.Fit(langau,"RFBQ");
+        TF1* langau1 = new TF1("langau1",langaufun,parameters.rangeMin_ch1,parameters.rangeMax_ch1,4);
+        langau1->SetNpx(10000);
+        langau1->SetParNames("Width","MP","Area","GSigma");
+        langau->SetParameters(0.05*parameters.rangeMax_ch0,0.25*parameters.rangeMax_ch0,50,h_pedestal_Det1.GetRMS());
+        langau->SetRange(parameters.rangeMin_ch1,parameters.rangeMax_ch1);
+  //       langau->FixParameter(3,h_pedestal_Det0.GetRMS());
+        h_max_selected_Det1.Fit(langau1,"RFBQ");
 
-
-  //       h_max_selected_Det1.Scale(1./h_max_selected_Det1.GetMaximum(),"nosw2");
         h_baseline_Det0.Scale(1./h_baseline_Det0.GetMaximum(),"nosw2");
         h_baseline_Det1.Scale(1./h_baseline_Det1.GetMaximum(),"nosw2");
         h_SNR_Det0.Scale(1./h_SNR_Det0.GetMaximum(),"nosw2");
@@ -458,23 +460,6 @@ class TimingAnalysis : public pulse
 
         h_risetime_Det0.Scale(1./h_risetime_Det0.GetMaximum(),"nosw2");
         h_risetime_Det1.Scale(1./h_risetime_Det1.GetMaximum(),"nosw2");
-
-//       std::cout << "Fitting Langau..." << std::endl;
-//       TF1 langau("langau",langaufun,0,2,4);
-//       langau.SetNpx(10000);
-//       langau.SetParNames("Width","MP","Area","GSigma");
-//       langau.SetParameters(0.025,0.3,50,h_pedestal_Det0.GetRMS());
-//       langau.SetRange(std::abs(parameters.threshold_ch0),2);
-//       langau.FixParameter(3,h_pedestal_Det0.GetRMS());
-//       h_max_Det0.Fit(&langau,"RFBQ");
-//
-//       TF1 langau1("langau1",langaufun,0,2,4);
-//       langau1.SetNpx(10000);
-//       langau1.SetParNames("Width","MP","Area","GSigma");
-//       langau1.SetParameters(0.025,0.3,50,h_pedestal_Det1.GetRMS());
-//       langau1.SetRange(std::abs(parameters.threshold_ch1),2);
-//       langau1.FixParameter(3,h_pedestal_Det1.GetRMS());
-//       h_max_Det1.Fit(&langau1,"RFBQ");
 
 
         std::cout << "Completed!" << std::endl;
@@ -539,7 +524,7 @@ class TimingAnalysis : public pulse
 	// Reference time
 	fChain->GetEntry(jentry);
 
-	if (jentry%100==0) std::cout<<"Processing entry number "<<jentry<<"\t\tfounded:\t"<< parameters.found<<std::endl;
+	if (jentry%100==0 && jentry>0) std::cout<<"Processing entry number "<<jentry<<"\t\tfounded:\t"<< parameters.found<<std::endl;
 
 
 	for (int Channel=0; Channel<16; ++Channel) {

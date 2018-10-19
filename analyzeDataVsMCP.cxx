@@ -10,14 +10,14 @@ int main (int argc, char** argv)
   int firstchannel=0;
   int secondchannel=1;
   float cfd_threshold=0.4;
-  float threshold_ch1=-0.1;
-  float threshold_ch2=-0.1;
+  float threshold_MCP=0.01;
+  float threshold=-0.1;
   float lowpass=0;
 
   // Additional parameters
   float hysteresis=1e-3;
-  float min_amplitude_ch1=0;
-  float max_amplitude_ch1=0.034;
+  float min_amplitude_MCP=0;
+  float max_amplitude_MCP=0.034;
   float min_amplitude_ch2=0;
   float max_amplitude_ch2=0.2;
   float baseline_p=0.1; //Use first 10% of the samples to compute baseline
@@ -30,12 +30,9 @@ int main (int argc, char** argv)
       if ( option == "-h" || option == "--help" ) {
         std::cout << "List of options: " << std::endl;
         std::cout << "-h [ --help ]                         produce help message" << std::endl;
-        std::cout << "-f [ --firstchannel ] arg (=0)        First channel to analyze" << std::endl;
-        std::cout << "-s [ --secondchannel ] arg (=1)       Second channel to analyze" << std::endl;
+        std::cout << "-f [ --channel ] arg (=0)             channel to analyze" << std::endl;
         std::cout << "-c [ --cfd_threshold ] arg (=0.4)     CFD fraction" << std::endl;
-        std::cout << "-t [ --threshold_ch1 ] arg (=-0.1)    Threshold for ch 1, negative for" << std::endl;
-        std::cout << "                                      negative signals (V)" << std::endl;
-        std::cout << "-w [ --threshold_ch2 ] arg (=-0.1)    Threshold for ch 2, negative for" << std::endl;
+        std::cout << "-t [ --threshold ] arg (=-0.1)        Threshold, negative for" << std::endl;
         std::cout << "                                      negative signals (V)" << std::endl;
         std::cout << "-p [ --lowpass ] arg (=0)             Lowpass filter frequency (Hz)" << std::endl;
         std::cout << "-o [ --outputdir ] arg (=./Results)   output directory" << std::endl;
@@ -44,18 +41,14 @@ int main (int argc, char** argv)
       }
       std::string value(argv[++i]);
 
-      if ( option == "-f" || option == "--firstchannel" )
-        firstchannel = std::stoi(value);
-      if ( option == "-s" || option == "--secondchannel" )
+      if ( option == "-f" || option == "--channel" )
         secondchannel = std::stoi(value);
       if ( option == "-i" || option == "--filename" )
         filename = value;
       if ( option == "-c" || option == "--cfd_threshold" )
         cfd_threshold = std::stof(value);
-      if ( option == "-t" || option == "--threshold_ch1" )
-        threshold_ch1 = std::stof(value);
-      if ( option == "-w" || option == "--threshold_ch2" )
-        threshold_ch2 = std::stof(value);
+      if ( option == "-t" || option == "--threshold" )
+        threshold = std::stof(value);
       if ( option == "-p" || option == "--lowpass" )
         lowpass = std::stof(value);
       if ( option == "-o" || option == "--outputdir" )
@@ -80,20 +73,17 @@ int main (int argc, char** argv)
   TimingAnalysis example_analyzeData(c_example);
 
   // Output file
-  TString filenameTail("_result_");
-  filenameTail+=firstchannel;
-  filenameTail+="_";
+  TString filenameTail("_result_MCP_");
   filenameTail+=secondchannel;
   filename.insert(filename.size()-5,filenameTail.Data());
   filename.erase(0,filename.find_last_of('/',filename.size()));
   filename.insert(0,outputdir);
-  std::cout<<filename<<std::endl;
   TFile * f_root = new TFile (filename.c_str(),"RECREATE");
 
   std::cout<<"Filling "<<filename<<" with "<<filename<<std::endl;
 
   if (cfd_threshold > 0) {
-    AlgorithmParameters par(cfd_threshold, cfd_threshold, threshold_ch1,threshold_ch2,lowpass,hysteresis,min_amplitude_ch1, max_amplitude_ch1, min_amplitude_ch2, max_amplitude_ch2,baseline_p);
+    AlgorithmParameters par(0.5, cfd_threshold, threshold_MCP,threshold,lowpass,hysteresis,min_amplitude_MCP, max_amplitude_MCP, min_amplitude_ch2, max_amplitude_ch2,baseline_p);
     double timeres_ps = example_analyzeData.executeTimeDifference<AlgorithmParameters>(f_root, ComputeExactTimeCFD, par, firstchannel, secondchannel)*1e12;
     std::cout << "\t\t\tTime difference: " << timeres_ps << " ps" << std::endl;
   }
@@ -103,12 +93,13 @@ int main (int argc, char** argv)
     cfd_graph.SetName("cfd_scan");
     int cfd_counter=0;
     for (float cfd_th=std::abs(cfd_threshold); cfd_th<1; cfd_th+=std::abs(cfd_threshold)) {
+      std::cout<< "############ CFD fraction " << cfd_th << " ############" <<std::endl;
       TString cfd_tmpdir_name("cfd_");
       cfd_tmpdir_name += (int) (100*cfd_th);
       cfd_tmpdir_name += "_percent";
       TDirectory* cfd_tmpdir = f_root->mkdir(cfd_tmpdir_name);
       cfd_tmpdir->cd();
-      AlgorithmParameters par(0.4, cfd_th,threshold_ch1,threshold_ch2,lowpass,hysteresis,min_amplitude_ch1, max_amplitude_ch1, min_amplitude_ch2, max_amplitude_ch2,baseline_p);  //Fixed cfd_threshold for ch0
+      AlgorithmParameters par( 0.5, cfd_th, threshold_MCP,threshold,lowpass,hysteresis,min_amplitude_MCP, max_amplitude_MCP, min_amplitude_ch2, max_amplitude_ch2,baseline_p);  //Fixed cfd_threshold for ch0
       double timeres_ps = example_analyzeData.executeTimeDifference<AlgorithmParameters>(f_root, ComputeExactTimeCFD, par, firstchannel, secondchannel)*1e12;
       std::cout << "\t\t\tTime difference: " << timeres_ps << " ps" << std::endl;
       cfd_graph.SetPoint(cfd_counter++, cfd_th, timeres_ps);
