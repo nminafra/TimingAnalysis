@@ -426,40 +426,40 @@ class TimingAnalysis : public pulse
         }
 
         // Normalize all histograms
-        h_deltat_SimpleThreshold.Scale(1./h_deltat_SimpleThreshold.GetMaximum(),"nosw2");
-        h_deltat_Smart.Scale(1./h_deltat_Smart.GetMaximum(),"nosw2");
-        h_TimeFromReference_Det0.Scale(1./h_TimeFromReference_Det0.GetMaximum(),"nosw2");
-        h_TimeFromReference_Det1.Scale(1./h_TimeFromReference_Det1.GetMaximum(),"nosw2");
+        // h_deltat_SimpleThreshold.Scale(1./h_deltat_SimpleThreshold.GetMaximum(),"nosw2");
+        // h_deltat_Smart.Scale(1./h_deltat_Smart.GetMaximum(),"nosw2");
+        // h_TimeFromReference_Det0.Scale(1./h_TimeFromReference_Det0.GetMaximum(),"nosw2");
+        // h_TimeFromReference_Det1.Scale(1./h_TimeFromReference_Det1.GetMaximum(),"nosw2");
+        //
+        // h_pedestal_Det0.Scale(1./h_pedestal_Det0.GetMaximum(),"nosw2");
+        // h_pedestal_Det1.Scale(1./h_pedestal_Det1.GetMaximum(),"nosw2");
+        // h_max_Det0.Scale(1./h_max_selected_Det0.GetMaximum(),"nosw2");
+        // h_max_Det1.Scale(1./h_max_selected_Det1.GetMaximum(),"nosw2");
+        // h_max_selected_Det0.Scale(1./h_max_selected_Det0.GetMaximum(),"nosw2");
+        // h_max_selected_Det1.Scale(1./h_max_selected_Det1.GetMaximum(),"nosw2");
 
-        h_pedestal_Det0.Scale(1./h_pedestal_Det0.GetMaximum(),"nosw2");
-        h_pedestal_Det1.Scale(1./h_pedestal_Det1.GetMaximum(),"nosw2");
-        h_max_Det0.Scale(1./h_max_selected_Det0.GetMaximum(),"nosw2");
-        h_max_Det1.Scale(1./h_max_selected_Det1.GetMaximum(),"nosw2");
-        h_max_selected_Det0.Scale(1./h_max_selected_Det0.GetMaximum(),"nosw2");
-        h_max_selected_Det1.Scale(1./h_max_selected_Det1.GetMaximum(),"nosw2");
+  //       TF1* langau = new TF1("langau",langaufun,parameters.rangeMin_ch0,parameters.rangeMax_ch0,4);
+  //       langau->SetNpx(10000);
+  //       langau->SetParNames("Width","MP","Area","GSigma");
+  //       langau->SetParameters(0.05*parameters.rangeMax_ch0,0.25*parameters.rangeMax_ch0,50,h_pedestal_Det0.GetRMS());
+  //       langau->SetRange(parameters.rangeMin_ch0,parameters.rangeMax_ch0);
+  // //       langau->FixParameter(3,h_pedestal_Det0.GetRMS());
+  //       h_max_selected_Det0.Fit(langau,"RFBQ");
+  //       TF1* langau1 = new TF1("langau1",langaufun,parameters.rangeMin_ch1,parameters.rangeMax_ch1,4);
+  //       langau1->SetNpx(10000);
+  //       langau1->SetParNames("Width","MP","Area","GSigma");
+  //       langau->SetParameters(0.05*parameters.rangeMax_ch0,0.25*parameters.rangeMax_ch0,50,h_pedestal_Det1.GetRMS());
+  //       langau->SetRange(parameters.rangeMin_ch1,parameters.rangeMax_ch1);
+  // //       langau->FixParameter(3,h_pedestal_Det0.GetRMS());
+  //       h_max_selected_Det1.Fit(langau1,"RFBQ");
 
-        TF1* langau = new TF1("langau",langaufun,parameters.rangeMin_ch0,parameters.rangeMax_ch0,4);
-        langau->SetNpx(10000);
-        langau->SetParNames("Width","MP","Area","GSigma");
-        langau->SetParameters(0.05*parameters.rangeMax_ch0,0.25*parameters.rangeMax_ch0,50,h_pedestal_Det0.GetRMS());
-        langau->SetRange(parameters.rangeMin_ch0,parameters.rangeMax_ch0);
-  //       langau->FixParameter(3,h_pedestal_Det0.GetRMS());
-        h_max_selected_Det0.Fit(langau,"RFBQ");
-        TF1* langau1 = new TF1("langau1",langaufun,parameters.rangeMin_ch1,parameters.rangeMax_ch1,4);
-        langau1->SetNpx(10000);
-        langau1->SetParNames("Width","MP","Area","GSigma");
-        langau->SetParameters(0.05*parameters.rangeMax_ch0,0.25*parameters.rangeMax_ch0,50,h_pedestal_Det1.GetRMS());
-        langau->SetRange(parameters.rangeMin_ch1,parameters.rangeMax_ch1);
-  //       langau->FixParameter(3,h_pedestal_Det0.GetRMS());
-        h_max_selected_Det1.Fit(langau1,"RFBQ");
-
-        h_baseline_Det0.Scale(1./h_baseline_Det0.GetMaximum(),"nosw2");
-        h_baseline_Det1.Scale(1./h_baseline_Det1.GetMaximum(),"nosw2");
-        h_SNR_Det0.Scale(1./h_SNR_Det0.GetMaximum(),"nosw2");
-        h_SNR_Det1.Scale(1./h_SNR_Det1.GetMaximum(),"nosw2");
-
-        h_risetime_Det0.Scale(1./h_risetime_Det0.GetMaximum(),"nosw2");
-        h_risetime_Det1.Scale(1./h_risetime_Det1.GetMaximum(),"nosw2");
+        // h_baseline_Det0.Scale(1./h_baseline_Det0.GetMaximum(),"nosw2");
+        // h_baseline_Det1.Scale(1./h_baseline_Det1.GetMaximum(),"nosw2");
+        // h_SNR_Det0.Scale(1./h_SNR_Det0.GetMaximum(),"nosw2");
+        // h_SNR_Det1.Scale(1./h_SNR_Det1.GetMaximum(),"nosw2");
+        //
+        // h_risetime_Det0.Scale(1./h_risetime_Det0.GetMaximum(),"nosw2");
+        // h_risetime_Det1.Scale(1./h_risetime_Det1.GetMaximum(),"nosw2");
 
 
         std::cout << "Completed!" << std::endl;
