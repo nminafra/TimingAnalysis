@@ -9,16 +9,16 @@ $> ./example_analyzeData --help
   -h [ --help ]                         produce help message
   -f [ --firstchannel ] arg (=0)        First channel to analyze
   -s [ --secondchannel ] arg (=1)       Second channel to analyze
-  -c [ --cfd_threshold ] arg (=0.40000000000000002) 
+  -c [ --cfd_threshold ] arg (=0.4)
                                         CFD fraction
-  -t [ --threshold_ch1 ] arg (=-0.10000000000000001)
-                                        Threshold for ch 1, negative for 
+  -t [ --threshold_ch1 ] arg (=-0.1)
+                                        Threshold for ch 1, negative for
                                         negative signals (V)
-  -w [ --threshold_ch2 ] arg (=-0.10000000000000001)
-                                        Threshold for ch 2, negative for 
+  -w [ --threshold_ch2 ] arg (=-0.1)
+                                        Threshold for ch 2, negative for
                                         negative signals (V)
-  -f [ --lowpass ] arg (=0)             Lowpass filter frequency (Hz)
-  -h [ --hysteresis ] arg (=0.0030000000000000001)
+  -p [ --lowpass ] arg (=0)             Lowpass filter frequency (Hz)
+  -j [ --hysteresis ] arg (=0.001)
                                         Hysteresis for the discriminator (V)
   -t [ --treename ] arg (=pulse)        Name of the TTree
   -o [ --outputdir ] arg (=~/Work/public/Fermilab/Results)
@@ -32,7 +32,7 @@ $> ./example_analyzeData -i /afs/cern.ch/work/n/nminafra/public/Fermilab/ -t -0.
 The output root file is saved in Results/ with the same name of the input file, plus _result_ch0_ch1.root
 Important plots:
 evN: graph of waveforms
-h_dtFit_Det1_Det0: time difference between the two channels with the method ComputeExactTimeCFD in /Oscilloscope_analyzeData/include/timingAlgorithm.h
+h_deltat_Smart: time difference between the two channels with the method ComputeExactTimeCFD in /TimingAnalysis/include/timingAlgorithm.h
 h_max_selected_DetN: amplitude of only events selected for timing analysis
 h_SNR_DetN: SNR computed event by event
 
