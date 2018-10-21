@@ -18,7 +18,6 @@
 #include <algorithm>
 #include <vector>
 #include <cmath>
-#include <boost/lexical_cast.hpp>
 
 typedef std::vector<TH1D*> TH1DptrVec_t;
 typedef std::vector<TH1DptrVec_t> TH1Dptr2dVec_t;
@@ -535,7 +534,7 @@ class TimingAnalysis : public pulse
 	    DataSamples.push_back( 1./ 4096 * channel[Channel][i] );
 	  }
 	  if (histograms.find(Channel)==histograms.end())
-	    histograms.insert( HistoMap::value_type( Channel, HistoStruct(boost::lexical_cast<std::string>(Channel),dirStruct) ) );
+	    histograms.insert( HistoMap::value_type( Channel, HistoStruct(std::to_string(Channel),dirStruct) ) );
 
 	  histograms.find(Channel)->second.h_rate->Fill((TimeSamples.at(0) - histograms.find(Channel)->second.startTime_prev));
 	  histograms.find(Channel)->second.startTime_prev = TimeSamples.at(0);
