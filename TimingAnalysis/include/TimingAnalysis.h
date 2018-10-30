@@ -144,7 +144,7 @@ class TimingAnalysis : public pulse
     void initialize();
 
     template <class T>
-    double executeTimeDifference(TFile * out_f, double (*computeExactTime) (std::vector<double>&, std::vector<double>&, T&), T& parameters, int ChannelMeasureA=0, int ChannelMeasureB=1) {
+    double executeTimeDifferenceWithMCP(TFile * out_f, double (*computeExactTime) (std::vector<double>&, std::vector<double>&, T&), T& parameters, int ChannelMeasureA=0, int ChannelMeasureB=1) {
       std::cout << "\nTime measurement started for channels " << ChannelMeasureA << " and " << ChannelMeasureB << std::endl;
 
       int eventNumber=0;
@@ -163,41 +163,41 @@ class TimingAnalysis : public pulse
       double ch2_baselineRms = .0;
 
       // Histo declaration, create new for a new file
-      TH1D h_deltat_SimpleThreshold("h_deltat_SimpleThreshold","h_deltat_SimpleThreshold",2000,-10e-9,10e-9);
-      TH1D h_deltat_Smart("h_deltat_Smart","h_deltat_Smart",2000,-10e-9,10e-9);
-      TH1D h_TimeFromReference_Det0("h_TimeFromReference_Det0","h_TimeFromReference_Det0",1000,-10e-9,10e-9);
-      TH1D h_TimeFromReference_Det1("h_TimeFromReference_Det1","h_TimeFromReference_Det1",1000,-10e-9,10e-9);
+      TH1D h_deltat_SimpleThreshold("h_deltat_SimpleThreshold","Time Difference wrt MCP using simple threshold; t(s)",2000,-10e-9,10e-9);
+      TH1D h_deltat_Smart("h_deltat_Smart","Time Difference wrt MCP; t(s)",2000,-10e-9,10e-9);
+      TH1D h_TimeFromReference_Det0("h_TimeFromReference_Det0","Time Difference bw MCP and gaus; t(s)",1000,-10e-9,10e-9);
+      TH1D h_TimeFromReference_Det1("h_TimeFromReference_Det1","Time Difference bw DUT and gaus; t(s)",1000,-10e-9,10e-9);
 
-      TH1D h_max_Det0("h_max_Det0","h_max_Det0",200,0,2*parameters.rangeMax_ch0);
-      TH1D h_max_Det1("h_max_Det1","h_max_Det1",200,0,2*parameters.rangeMax_ch1);
-      TH1D h_max_selected_Det0("h_max_selected_Det0","h_max_selected_Det0",50,0,1.2*parameters.rangeMax_ch0);
-      TH1D h_max_selected_Det1("h_max_selected_Det1","h_max_selected_Det1",50,0,1.2*parameters.rangeMax_ch1);
-      TH1D h_charge_selected_Det0("h_charge_selected_Det0","h_charge_selected_Det0",100,0,20);
-      TH1D h_baseline_Det0("h_baseline_Det0","h_baseline_Det0",200,-0.01,0.01);
-      TH1D h_baseline_Det1("h_baseline_Det1","h_baseline_Det1",200,-0.01,0.01);
-      TH1D h_pedestal_Det0("h_pedestal_Det0","h_pedestal_Det0",1000,-0.1,0.1);
-      TH1D h_pedestal_Det1("h_pedestal_Det1","h_pedestal_Det1",1000,-0.1,0.1);
-      TH1D h_SNR_Det0("h_SNR_Det0","h_SNR_Det0",150,0,150);
-      TH1D h_SNR_Det1("h_SNR_Det1","h_SNR_Det1",150,0,150);
+      TH1D h_max_Det0("h_max_Det0","Amplitude MCP; V",200,0,2*parameters.rangeMax_ch0);
+      TH1D h_max_Det1("h_max_Det1","",200,0,2*parameters.rangeMax_ch1);
+      TH1D h_max_selected_Det0("h_max_selected_Det0","Amplitude of selected samples (MCP); V",200,0,2*parameters.rangeMax_ch0);
+      TH1D h_max_selected_Det1("h_max_selected_Det1","Amplitude of selected samples (DUT); V",200,0,2*parameters.rangeMax_ch1);
+      TH1D h_baseline_Det0("h_baseline_Det0","Baseline of MCP; V",200,-0.01,0.01);
+      TH1D h_baseline_Det1("h_baseline_Det1","Baseline of DUT; V",200,-0.01,0.01);
+      TH1D h_pedestal_Det0("h_pedestal_Det0","Pedestal (RMS before pulse) of MCP; V",1000,-0.1,0.1);
+      TH1D h_pedestal_Det1("h_pedestal_Det1","Pedestal (RMS before pulse) of DUT; V",1000,-0.1,0.1);
+      TH1D h_SNR_Det0("h_SNR_Det0","SNR of MCP; SNR",150,0,150);
+      TH1D h_SNR_Det1("h_SNR_Det1","SNR of DUT; SNR",150,0,150);
 
-      TH1D h_risetime_Det0("h_risetime_Det0","h_risetime_Det0",300,0,3e-9);
-      TH1D h_risetime_Det1("h_risetime_Det1","h_risetime_Det1",300,0,3e-9);
+      TH1D h_risetime_Det0("h_risetime_Det0","Risetime of MCP; rt (s)",300,0,3e-9);
+      TH1D h_risetime_Det1("h_risetime_Det1","Risetime of DUT; rt (s)",300,0,3e-9);
 
-      TH1D h_nOfPeaks_Det0("h_nOfPeaks_Det0","h_nOfPeaks_Det0",10,0,10);
-      TH1D h_nOfPeaks_Det1("h_nOfPeaks_Det1","h_nOfPeaks_Det1",10,0,10);
-      TH1D h_coincidences("h_coincidences","h_coincidences",4,0,4);
+      TH1D h_nOfPeaks_Det0("h_nOfPeaks_Det0","Number of peaks found per trigger (MCP); number of peaks",10,0,10);
+      TH1D h_nOfPeaks_Det1("h_nOfPeaks_Det1","Number of peaks found per trigger (DUT); number of peaks",10,0,10);
+      TH1D h_coincidences("h_coincidences","Number of channels with signal; #",4,0,4);
 
-      int numOfBinX = 9;
-      int numOfBinY = 9;
-      TH2D bidimHistogram("bidimHistogram","bidimHistogram",numOfBinX,parameters.rangeMin_ch0,parameters.rangeMax_ch0,numOfBinY,parameters.rangeMin_ch1,parameters.rangeMax_ch1);
-      TH2D bidimHistogramRMS("bidimHistogramRMS","bidimHistogramRMS",numOfBinX,parameters.rangeMin_ch0,parameters.rangeMax_ch0,numOfBinY,parameters.rangeMin_ch1,parameters.rangeMax_ch1);
-      TH2I bidimHistogramN("bidimHistogramN","bidimHistogramN",numOfBinX,parameters.rangeMin_ch0,parameters.rangeMax_ch0,numOfBinY,parameters.rangeMin_ch1,parameters.rangeMax_ch1);
+      int numOfBinX = 7;
+      int numOfBinY = (parameters.rangeMax_ch1-parameters.rangeMin_ch1)/0.01;
+      TH2D bidimHistogram("bidimHistogram","Time difference bw MCP and DUT; ampl MCP (V); ampl DUT (V)",numOfBinX,parameters.rangeMin_ch0,parameters.rangeMax_ch0,numOfBinY,parameters.rangeMin_ch1,parameters.rangeMax_ch1);
+      TH2D bidimHistogramRMS("bidimHistogramRMS","RMS of time difference bw MCP and DUT (ps); ampl MCP (V); ampl DUT (V)",numOfBinX,parameters.rangeMin_ch0,parameters.rangeMax_ch0,numOfBinY,parameters.rangeMin_ch1,parameters.rangeMax_ch1);
+      TH2D bidimHistogramSigma("bidimHistogramSigma","Sigma of time difference bw MCP and DUT (ps); ampl MCP (V); ampl DUT (V)",numOfBinX,parameters.rangeMin_ch0,parameters.rangeMax_ch0,numOfBinY,parameters.rangeMin_ch1,parameters.rangeMax_ch1);
+      TH2I bidimHistogramN("bidimHistogramN","Number of entries; ampl MCP (V); ampl DUT (V)",numOfBinX,parameters.rangeMin_ch0,parameters.rangeMax_ch0,numOfBinY,parameters.rangeMin_ch1,parameters.rangeMax_ch1);
       TH1DptrVec_t bidimHistogramVec(bidimHistogram.GetNbinsX()*bidimHistogram.GetNbinsY());
       std::cout<<"bins: "<<bidimHistogram.GetNbinsX()*bidimHistogram.GetNbinsY()<<std::endl;
       for(int itx=0; itx<bidimHistogramVec.size(); ++itx) {
       	TString histName("tmpHist_");
       	histName+=itx;
-      	bidimHistogramVec.at(itx) = new TH1D(histName,histName,3000,-10e-9,10e-9);
+      	bidimHistogramVec.at(itx) = new TH1D(histName,histName,2000,-10e-9,10e-9);
       }
 
       int corrections_point=0;
@@ -216,15 +216,15 @@ class TimingAnalysis : public pulse
       TGraph g_channels_corrlations;
       g_channels_corrlations.SetName("Correlations");
 
-      TGraph g_correlations;
-      g_correlations.SetName("DeltaT");
-      TGraph g_correlations2;
-      g_correlations2.SetName("RMS");
+      TGraph g_deltaTwithTime;
+      g_deltaTwithTime.SetName("DeltaT");
+      TGraph g_rmswithTime;
+      g_rmswithTime.SetName("RMS");
       TGraph g_maximum0;
-      g_maximum0.SetName("Maximum0VsTime");
+      g_maximum0.SetName("MaximumMCPVsTime");
       int g_maximum0_point=0;
       TGraph g_maximum1;
-      g_maximum1.SetName("Maximum1VsTime");
+      g_maximum1.SetName("MaximumDUTVsTime");
       int g_maximum1_point=0;
       TGraph g_tot_ch0;
       int point_tot_ch0=0;
@@ -236,7 +236,6 @@ class TimingAnalysis : public pulse
       int pointCorr=0;
       int pointCorr2=0;
       parameters.found = 0;
-      parameters.rejectedCounter = 0;
       int plotted=0;
 
       // Loop on the files
@@ -286,7 +285,7 @@ class TimingAnalysis : public pulse
               std::vector<double> TimeSamplesB;
       	std::vector<double> DataSamplesA;
       	std::vector<double> DataSamplesB;
-      	for (int i=0; i< 1000; ++i) {
+      	for (int i=0; i< 500; ++i) {
           TimeSamplesA.push_back( 1e-9* (double) (time[0][i]-time[0][0]));
           TimeSamplesB.push_back( 1e-9* (double) (time[0][i]-time[0][0]));
       	  DataSamplesA.push_back( 1./ 1000. * (double) channel[ChannelMeasureA][i] );
@@ -310,7 +309,6 @@ class TimingAnalysis : public pulse
     	  ch1_baselineRms = parameters.baseline_rms;
     	  h_nOfPeaks_Det0.Fill(parameters.numberOfpeaks);
     	  h_baseline_Det0.Fill(parameters.baseline_rms);
-    // 	    std::cout<<parameters.numberOfpeaks<<std::endl;
     	  T_threshold_A = parameters.thresholdTime;
 
     	  //Pedestal
@@ -321,9 +319,9 @@ class TimingAnalysis : public pulse
     	    }
     	  }
 
-    	  if (T_Sample_A!=-1 /*&& T_threshold_A>35e-9 && T_threshold_A<65e-9*/) {
+    	  if (T_Sample_A!=-1) {
     	    h_max_selected_Det0.Fill(parameters.maximum);
-    	    h_charge_selected_Det0.Fill(1033.1*TMath::Power(parameters.maximum,3)-443.99*TMath::Power(parameters.maximum,2)+139.12* parameters.maximum);
+          g_maximum0.SetPoint(point_tot_ch0,((double) eventCounter)/10000,parameters.maximum);
     	    h_SNR_Det0.Fill(parameters.maximum / ch1_baselineRms);
     	    h_risetime_Det0.Fill(parameters.risetime);
       	    if (gaus_mean[0] != 0 ) h_TimeFromReference_Det0.Fill(T_threshold_A-1e-9* (double)gaus_mean[0]);
@@ -339,10 +337,8 @@ class TimingAnalysis : public pulse
       	  ch2_baselineRms = parameters.baseline_rms;
       	  h_nOfPeaks_Det1.Fill(parameters.numberOfpeaks);
       	  h_baseline_Det1.Fill(parameters.baseline_rms);
-      // 	    std::cout<<parameters.numberOfpeaks<<std::endl;
       	  T_threshold_B = parameters.thresholdTime;
       	  h_max_Det1.Fill(parameters.maximum);
-      // 	  std::cout<<"Filling Det1 with "<<parameters.maximum<<std::endl;
 
       	  //Pedestal
       	  if (parameters.numberOfpeaks<=1) {
@@ -352,13 +348,14 @@ class TimingAnalysis : public pulse
       	    }
       	  }
 
-      	  if (T_Sample_B!=-1 /*&& T_threshold_B>35e-9 && T_threshold_B<65e-9*/) {
+      	  if (T_Sample_B!=-1) {
       	    if (TMath::Abs(parameters.timeOverThreshold) < 1) g_tot_ch1.SetPoint(point_tot_ch1++,parameters.timeOverThreshold,parameters.maximum);
       	    h_max_selected_Det1.Fill(parameters.maximum);
+            g_maximum1.SetPoint(point_tot_ch1,((double) eventCounter)/10000,parameters.maximum);
       	    h_SNR_Det1.Fill(parameters.maximum / ch2_baselineRms);
       	    h_risetime_Det1.Fill(parameters.risetime);
       	    if (gaus_mean[0] != 0 ) h_TimeFromReference_Det1.Fill(T_threshold_B-1e-9* (double) gaus_mean[0]);
-      	    ++coincidences;
+        	    ++coincidences;
 
         	  if (plotted<10 ) {
         	    for (int shift=0; shift<TimeSamplesB.size(); ++shift) {
@@ -370,12 +367,11 @@ class TimingAnalysis : public pulse
 
         	//Select couple of hits
         	h_coincidences.Fill(coincidences);
-        	g_correlations2.SetPoint(pointCorr2++, eventCounter, h_deltat_Smart.GetRMS());
+        	g_rmswithTime.SetPoint(pointCorr2++, eventCounter, h_deltat_Smart.GetRMS());
 
         	if (coincidences==2 && TMath::Abs(T_Sample_B-T_Sample_A)<100e-9 ) {
         	  if (T_Sample_A!=-1 && T_Sample_B!=-1) {
-        // 	    if (TMath::Abs(T_Sample_B-T_Sample_A) > 10e-9) continue;
-        	    g_correlations.SetPoint(pointCorr++, ((double) eventCounter)/10000, (T_Sample_B-T_Sample_A)*1e9);
+        	    g_deltaTwithTime.SetPoint(pointCorr++, ((double) eventCounter)/10000, (T_Sample_B-T_Sample_A)*1e9);
         	    h_deltat_Smart.Fill(T_Sample_B-T_Sample_A);
         	    g_channels_corrlations.SetPoint(ChannelsCorrelations_i++,T_Sample_A,T_Sample_B);
 
@@ -406,10 +402,21 @@ class TimingAnalysis : public pulse
         	}
         } //Loop end
 
+        std::cout << "Completed!" << std::endl;
+        std::cout << "RMS Det1-Det0 using simple threshold:\t" << h_deltat_SimpleThreshold.GetRMS() << std::endl;
+        std::cout << "RMS Det1-Det0 using smart algorithm:\t" << h_deltat_Smart.GetRMS() << std::endl;
+        TF1 gausDt("gausDt","gaus",h_deltat_Smart.GetMean() - 2*h_deltat_Smart.GetRMS(),h_deltat_Smart.GetMean() + 2*h_deltat_Smart.GetRMS());
+        h_deltat_Smart.Fit(&gausDt,"RFQ");
+
+        std::cout << "Sigma of Det1-Det0 using smart algorithm:\t" << gausDt.GetParameter(2) << std::endl;
+
         for(int itx=0; itx<bidimHistogramVec.size(); ++itx) {
-        	if (bidimHistogramVec.at(itx)->GetEntries() > 0) {
-        	  bidimHistogram.SetBinContent(itx,(bidimHistogramVec.at(itx)->GetMean()-h_deltat_Smart.GetMean())*1e12);
-        	  bidimHistogramRMS.SetBinContent(itx,bidimHistogramVec.at(itx)->GetRMS()*1e12);
+        	if (bidimHistogramVec.at(itx)->GetEntries() > 10) {
+            TF1 gausDtemp("gausDtemp","gaus", bidimHistogramVec.at(itx)->GetMean() - 2*bidimHistogramVec.at(itx)->GetRMS(), bidimHistogramVec.at(itx)->GetMean() + 2*bidimHistogramVec.at(itx)->GetRMS());
+            bidimHistogramVec.at(itx)->Fit(&gausDtemp,"RFQ");
+        	  bidimHistogram.SetBinContent(itx,(bidimHistogramVec.at(itx)->GetMean()-gausDt.GetParameter(1))*1e12);
+        	  if (bidimHistogramVec.at(itx)->GetEntries() > 25) bidimHistogramSigma.SetBinContent(itx,gausDtemp.GetParameter(2)*1e12);
+            bidimHistogramRMS.SetBinContent(itx,bidimHistogramVec.at(itx)->GetRMS()*1e12);
         	}
         	bidimHistogramN.SetBinContent(itx,bidimHistogramVec.at(itx)->GetEntries());
         }
@@ -460,19 +467,10 @@ class TimingAnalysis : public pulse
         // h_risetime_Det0.Scale(1./h_risetime_Det0.GetMaximum(),"nosw2");
         // h_risetime_Det1.Scale(1./h_risetime_Det1.GetMaximum(),"nosw2");
 
-
-        std::cout << "Completed!" << std::endl;
-        std::cout << "RMS Det1-Det0 using simple threshold:\t" << h_deltat_SimpleThreshold.GetRMS() << std::endl;
-        std::cout << "RMS Det1-Det0 using smart algorithm:\t" << h_deltat_Smart.GetRMS() << std::endl;
-        TF1 gausDt("gausDt","gaus",h_deltat_Smart.GetMean() - 2*h_deltat_Smart.GetRMS(),h_deltat_Smart.GetMean() + 2*h_deltat_Smart.GetRMS());
-        h_deltat_Smart.Fit(&gausDt,"RFQ");
-
-        std::cout << "Sigma of Det1-Det0 using smart algorithm:\t" << gausDt.GetParameter(2) << std::endl;
-        std::cout << "Rejected:\t" << parameters.rejectedCounter << std::endl;
-        g_correlations.Write();
-        g_correlations2.Write();
-  //       g_maximum0.Write();
-  //       g_maximum1.Write();
+        g_deltaTwithTime.Write();
+        g_rmswithTime.Write();
+        g_maximum0.Write();
+        g_maximum1.Write();
         g_tot_ch0.Write();
         g_tot_ch1.Write();
         out_f->Write();
@@ -509,79 +507,76 @@ class TimingAnalysis : public pulse
       Long64_t nentries = fChain->GetEntries();
       int internalcount=0;
       for (Long64_t jentry=0; jentry<nentries;++jentry) {
-	if (LoadTree(jentry) < 0) break;
+	        if (LoadTree(jentry) < 0) break;
 
-	TGraph* interp_th = new TGraph();
-	int point_gr=0;
+        	TGraph* interp_th = new TGraph();
+        	int point_gr=0;
 
-	ch1_maximum=.0;
-	ch1_baselineRms=.0;
-	++point;
+        	ch1_maximum=.0;
+        	ch1_baselineRms=.0;
+        	++point;
 
-// 	if (point>1000) break;
-// 	if (jentry>500) break;
-	// Reference time
-	fChain->GetEntry(jentry);
+        	fChain->GetEntry(jentry);
 
-	if (jentry%100==0 && jentry>0) std::cout<<"Processing entry number "<<jentry<<"\t\tfounded:\t"<< parameters.found<<std::endl;
+        	if (jentry%1000==0 && jentry>0) std::cout<<"Processing entry number "<<jentry<<"\t\tfounded:\t"<< parameters.found<<std::endl;
 
+        	for (int Channel=0; Channel<4; ++Channel) {
+        	  std::vector<double> TimeSamples;
+        	  std::vector<double> DataSamples;
+        	  for (int i=0; i< 1000; ++i) {
+        	    TimeSamples.push_back(1e-9 * time[0][i] );
+        	    DataSamples.push_back( 1./ 1000 * channel[Channel][i] );
+        	  }
+        	  if (histograms.find(Channel)==histograms.end())
+        	    histograms.insert( HistoMap::value_type( Channel, HistoStruct(std::to_string(Channel),dirStruct) ) );
 
-	for (int Channel=0; Channel<16; ++Channel) {
-	  std::vector<double> TimeSamples;
-	  std::vector<double> DataSamples;
-	  for (int i=0; i< 1024; ++i) {
-	    TimeSamples.push_back(1e-9 * time[0][i] );
-	    DataSamples.push_back( 1./ 4096 * channel[Channel][i] );
-	  }
-	  if (histograms.find(Channel)==histograms.end())
-	    histograms.insert( HistoMap::value_type( Channel, HistoStruct(std::to_string(Channel),dirStruct) ) );
+        	  histograms[Channel].h_rate->Fill((TimeSamples.at(0) - histograms[Channel].startTime_prev));
+        	  histograms[Channel].startTime_prev = TimeSamples.at(0);
 
-	  histograms.find(Channel)->second.h_rate->Fill((TimeSamples.at(0) - histograms.find(Channel)->second.startTime_prev));
-	  histograms.find(Channel)->second.startTime_prev = TimeSamples.at(0);
-	  parameters.detectorNumber=1;
-	  computeExactTime(TimeSamples, DataSamples, parameters);
-	  histograms.find(Channel)->second.h_max->Fill(parameters.maximum);
-	  ch1_maximum = parameters.maximum;
-	  ch1_baselineRms = parameters.baseline_rms;
-	  histograms.find(Channel)->second.h_nOfPeaks->Fill(parameters.numberOfpeaks);
-	  histograms.find(Channel)->second.h_baseline->Fill(parameters.baseline_rms);
-// 	    std::cout<<parameters.numberOfpeaks<<std::endl;
+            if (Channel==0)
+          	  parameters.detectorNumber=0;
+            else
+          	  parameters.detectorNumber=1;
+        	  computeExactTime(TimeSamples, DataSamples, parameters);
+        	  histograms[Channel].h_max->Fill(parameters.maximum);
+        	  ch1_maximum = parameters.maximum;
+        	  ch1_baselineRms = parameters.baseline_rms;
+        	  histograms[Channel].h_nOfPeaks->Fill(parameters.numberOfpeaks);
+        	  histograms[Channel].h_baseline->Fill(parameters.baseline_rms);
+        // 	    std::cout<<parameters.numberOfpeaks<<std::endl;
 
-	  //Pedestal
-	  if (parameters.numberOfpeaks<=1) {
-	    for (int shift=1; shift<TimeSamples.size(); ++shift) {
-	      if (TimeSamples.at(shift)-TimeSamples.at(0) > (parameters.thresholdTime-TimeSamples.at(0))/4)
-		break;
-	      histograms.find(Channel)->second.h_pedestal->Fill(-DataSamples.at(shift));
-	    }
-	  }
+      	  //Pedestal
+      	  if (parameters.numberOfpeaks<=1) {
+      	    for (int shift=1; shift<TimeSamples.size(); ++shift) {
+      	      if (TimeSamples.at(shift)-TimeSamples.at(0) > (parameters.thresholdTime-TimeSamples.at(0))/4)
+      		break;
+      	      histograms[Channel].h_pedestal->Fill(-DataSamples.at(shift));
+      	    }
+      	  }
 
+      	  if (parameters.numberOfpeaks==1) {
+      	    histograms[Channel].h_SNR->Fill(parameters.maximum / ch1_baselineRms);
+      	    histograms[Channel].h_risetime->Fill(parameters.risetime);
 
-	  if (parameters.numberOfpeaks==1) {
-	    histograms.find(Channel)->second.h_SNR->Fill(parameters.maximum / ch1_baselineRms);
-	    histograms.find(Channel)->second.h_risetime->Fill(parameters.risetime);
-
-// 	    if (parameters.found<20) {
-// 	      for (int shift=0; shift<TimeSamples->size(); ++shift) {
-// 		interp_th->SetPoint(point_gr++,1e9*TimeSamples->at(shift),-DataSamples->at(shift));
-// 	      }
-// 	      interp_th->Write();
-// 	    }
-	    ++(parameters.found);
-	  }
-	}
-// 	else std::cout << "Problem with Det0 channel!" << std::endl;
+      	    if (parameters.found<20) {
+      	      for (int shift=0; shift<TimeSamples.size(); ++shift) {
+            		interp_th->SetPoint(point_gr++,1e9*TimeSamples.at(shift),-DataSamples.at(shift));
+      	      }
+      	      interp_th->Write();
+      	    }
+      	    ++(parameters.found);
+      	  }
+      	}
       } //Loop end
 
       // Normalize all histograms
       for (HistoMap::iterator it=histograms.begin(); it != histograms.end(); ++it) {
-	it->second.h_pedestal->Scale(1./it->second.h_pedestal->GetMaximum());
-	it->second.h_SNR->Scale(1./it->second.h_SNR->GetMaximum());
-	it->second.h_baseline->Scale(1./it->second.h_baseline->GetMaximum());
-	it->second.h_max->Scale(1./it->second.h_max->GetMaximum());
-	it->second.h_risetime->Scale(1./it->second.h_risetime->GetMaximum());
+      	it->second.h_pedestal->Scale(1./it->second.h_pedestal->GetMaximum());
+      	it->second.h_SNR->Scale(1./it->second.h_SNR->GetMaximum());
+      	it->second.h_baseline->Scale(1./it->second.h_baseline->GetMaximum());
+      	it->second.h_max->Scale(1./it->second.h_max->GetMaximum());
+      	it->second.h_risetime->Scale(1./it->second.h_risetime->GetMaximum());
       }
-
 
       out_f->cd();
       TH1D* allRates = new TH1D("allRates","allRates",32,0,32);
@@ -596,23 +591,23 @@ class TimingAnalysis : public pulse
 
       TF1* rateFunc = new TF1("rateFunc","[0] * exp( - [1] * x)",1e-6,100);
       for (HistoMap::iterator it=histograms.begin(); it != histograms.end(); ++it) {
-	it->second.h_rate->Fit("rateFunc","RQ","",1e-6,10);
-	if (rateFunc->GetParameter(1) == rateFunc->GetParameter(1))
-	  allRates->Fill(it->first,rateFunc->GetParameter(1));
+      	it->second.h_rate->Fit("rateFunc","RQ","",1e-6,10);
+      	if (rateFunc->GetParameter(1) == rateFunc->GetParameter(1))
+      	  allRates->Fill(it->first,rateFunc->GetParameter(1));
 
-	if (it->second.h_nOfPeaks->GetMean() == it->second.h_nOfPeaks->GetMean())
-	  meanNOfPeaks->Fill(it->first, it->second.h_nOfPeaks->GetMean());
+      	if (it->second.h_nOfPeaks->GetMean() == it->second.h_nOfPeaks->GetMean())
+      	  meanNOfPeaks->Fill(it->first, it->second.h_nOfPeaks->GetMean());
 
-	if (it->second.h_pedestal->GetRMS() == it->second.h_pedestal->GetRMS())
-	  noiseRMS->Fill(it->first, it->second.h_pedestal->GetRMS());
+      	if (it->second.h_pedestal->GetRMS() == it->second.h_pedestal->GetRMS())
+      	  noiseRMS->Fill(it->first, it->second.h_pedestal->GetRMS());
 
-	if (it->second.h_risetime->GetMean() == it->second.h_risetime->GetMean())
-	  allRiseTime->Fill(it->first, it->second.h_risetime->GetMean());
+      	if (it->second.h_risetime->GetMean() == it->second.h_risetime->GetMean())
+      	  allRiseTime->Fill(it->first, it->second.h_risetime->GetMean());
 
-	if (it->second.h_SNR->GetMean() == it->second.h_SNR->GetMean())
-	  allSNR->Fill(it->first, it->second.h_SNR->GetMean());
+      	if (it->second.h_SNR->GetMean() == it->second.h_SNR->GetMean())
+      	  allSNR->Fill(it->first, it->second.h_SNR->GetMean());
 
-	std::cout<<it->first<<"\t\t"<<std::setprecision(4)<< rateFunc->GetParameter(1) << "\t\t\t" << it->second.h_nOfPeaks->GetMean() << "\t\t\t" << it->second.h_pedestal->GetRMS()<< std::endl;
+      	std::cout<<it->first<<"\t\t"<<std::setprecision(4)<< rateFunc->GetParameter(1) << "\t\t\t" << it->second.h_nOfPeaks->GetMean() << "\t\t\t" << it->second.h_pedestal->GetRMS()<< std::endl;
       }
 
       std::cout << "\n//************************************************************************//" << std::endl;

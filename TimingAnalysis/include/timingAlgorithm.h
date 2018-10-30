@@ -193,10 +193,10 @@ double PreProcess(std::vector<double>& time, std::vector<double>& data, Algorith
   //Smoothing
   if (gauss_values_pt->size() == 0 && param.sigma!=0) {
     if (param.detectorNumber==1) param.sigma = 0.8e9;   //Fixed for ch0
-    TF1 sinc("sinc","[0]*sin(2*pi*[1]*x)/(2*pi*[1]*x)",-50./param.sigma,50./param.sigma);
+    TF1 sinc("sinc","[0]*sin(2*pi*[1]*x)/(2*pi*[1]*x)",-20./param.sigma,20./param.sigma);
     sinc.SetParameter(0,1);
     sinc.SetParameter(1,param.sigma);
-    int threeSigmaInteger = (3./param.sigma) / SamplingPeriod;
+    int threeSigmaInteger = (15./param.sigma) / SamplingPeriod;
     std::cout<< "Detector number: " << param.detectorNumber <<std::endl;
     std::cout<< "Smoothing values: " <<std::endl;
     std::cout<< "Low pass freq: " << param.sigma <<std::endl;
