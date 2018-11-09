@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Thu Oct 18 21:37:10 2018 by ROOT version 6.06/08
+// Fri Nov  9 11:22:10 2018 by ROOT version 6.08/07
 // from TTree pulse/Digitized waveforms
-// found on file: DataNetScope_Run1276.root
+// found on file: DataVMETiming_Run249_3.root
 //////////////////////////////////////////////////////////
 
 #ifndef pulse_h
@@ -23,25 +23,36 @@ public :
 
    // Declaration of leaf types
    UInt_t          i_evt;
-   Float_t         channel[4][1000];
-   Float_t         time[1][1000];
-   Float_t         baseline[4];
-   Float_t         baseline_RMS[4];
-   Float_t         amp[4];
-   Float_t         t_peak[4];
-   Float_t         integral[4];
-   Float_t         intfull[4];
-   Float_t         risetime[4];
-   Float_t         decaytime[4];
-   Float_t         gaus_mean[4];
-   Float_t         gaus_sigma[4];
-   Float_t         gaus_chi2[4];
-   Float_t         LP1_10[4];
-   Float_t         LP1_20[4];
-   Float_t         LP1_30[4];
-   Float_t         LP2_10[4];
-   Float_t         LP2_20[4];
-   Float_t         LP2_30[4];
+   Float_t         channel[36][1024];
+   Float_t         time[4][1024];
+   Float_t         baseline[36];
+   Float_t         baseline_RMS[36];
+   Float_t         noise[36];
+   Float_t         amp[36];
+   Float_t         t_peak[36];
+   Float_t         integral[36];
+   Float_t         intfull[36];
+   Float_t         risetime[36];
+   Float_t         decaytime[36];
+   Float_t         LP2_20[36];
+   Float_t         LP2_30mV[36];
+   Float_t         InterpolatedAmp[36];
+   Float_t         t0_30[36];
+   Float_t         t1_30[36];
+   Float_t         tot_30[36];
+   Float_t         t0CFD_20[36];
+   Float_t         t1CFD_20[36];
+   Float_t         totCFD_20[36];
+   Int_t           triggerNumber;
+   UShort_t        corruption;
+   Float_t         xIntercept;
+   Float_t         yIntercept;
+   Float_t         xSlope;
+   Float_t         ySlope;
+   Float_t         x_dut[4];
+   Float_t         y_dut[4];
+   Float_t         chi2;
+   Int_t           ntracks;
 
    // List of branches
    TBranch        *b_i_evt;   //!
@@ -49,21 +60,32 @@ public :
    TBranch        *b_time;   //!
    TBranch        *b_baseline;   //!
    TBranch        *b_baseline_RMS;   //!
+   TBranch        *b_noise;   //!
    TBranch        *b_amp;   //!
    TBranch        *b_t_peak;   //!
    TBranch        *b_integral;   //!
    TBranch        *b_intfull;   //!
    TBranch        *b_risetime;   //!
    TBranch        *b_decaytime;   //!
-   TBranch        *b_gaus_mean;   //!
-   TBranch        *b_gaus_sigma;   //!
-   TBranch        *b_gaus_chi2;   //!
-   TBranch        *b_LP1_10;   //!
-   TBranch        *b_LP1_20;   //!
-   TBranch        *b_LP1_30;   //!
-   TBranch        *b_LP2_10;   //!
    TBranch        *b_LP2_20;   //!
-   TBranch        *b_LP2_30;   //!
+   TBranch        *b_LP2_30mV;   //!
+   TBranch        *b_InterpolatedAmp;   //!
+   TBranch        *b_t0_30;   //!
+   TBranch        *b_t1_30;   //!
+   TBranch        *b_tot_30;   //!
+   TBranch        *b_t0CFD_20;   //!
+   TBranch        *b_t1CFD_20;   //!
+   TBranch        *b_totCFD_20;   //!
+   TBranch        *b_triggerNumber;   //!
+   TBranch        *b_corruption;   //!
+   TBranch        *b_xIntercept;   //!
+   TBranch        *b_yIntercept;   //!
+   TBranch        *b_xSlope;   //!
+   TBranch        *b_ySlope;   //!
+   TBranch        *b_x_dut;   //!
+   TBranch        *b_y_dut;   //!
+   TBranch        *b_chi2;   //!
+   TBranch        *b_ntracks;   //!
 
    pulse(TTree *tree=0);
    virtual ~pulse();
@@ -79,14 +101,14 @@ public :
 #endif
 
 #ifdef pulse_cxx
-pulse::pulse(TTree *tree) : fChain(0)
+pulse::pulse(TTree *tree) : fChain(0) 
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("DataNetScope_Run1276.root");
+      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("DataVMETiming_Run249_3.root");
       if (!f || !f->IsOpen()) {
-         f = new TFile("DataNetScope_Run1276.root");
+         f = new TFile("DataVMETiming_Run249_3.root");
       }
       f->GetObject("pulse",tree);
 
@@ -140,21 +162,32 @@ void pulse::Init(TTree *tree)
    fChain->SetBranchAddress("time", time, &b_time);
    fChain->SetBranchAddress("baseline", baseline, &b_baseline);
    fChain->SetBranchAddress("baseline_RMS", baseline_RMS, &b_baseline_RMS);
+   fChain->SetBranchAddress("noise", noise, &b_noise);
    fChain->SetBranchAddress("amp", amp, &b_amp);
    fChain->SetBranchAddress("t_peak", t_peak, &b_t_peak);
    fChain->SetBranchAddress("integral", integral, &b_integral);
    fChain->SetBranchAddress("intfull", intfull, &b_intfull);
    fChain->SetBranchAddress("risetime", risetime, &b_risetime);
    fChain->SetBranchAddress("decaytime", decaytime, &b_decaytime);
-   fChain->SetBranchAddress("gaus_mean", gaus_mean, &b_gaus_mean);
-   fChain->SetBranchAddress("gaus_sigma", gaus_sigma, &b_gaus_sigma);
-   fChain->SetBranchAddress("gaus_chi2", gaus_chi2, &b_gaus_chi2);
-   fChain->SetBranchAddress("LP1_10", LP1_10, &b_LP1_10);
-   fChain->SetBranchAddress("LP1_20", LP1_20, &b_LP1_20);
-   fChain->SetBranchAddress("LP1_30", LP1_30, &b_LP1_30);
-   fChain->SetBranchAddress("LP2_10", LP2_10, &b_LP2_10);
    fChain->SetBranchAddress("LP2_20", LP2_20, &b_LP2_20);
-   fChain->SetBranchAddress("LP2_30", LP2_30, &b_LP2_30);
+   fChain->SetBranchAddress("LP2_30mV", LP2_30mV, &b_LP2_30mV);
+   fChain->SetBranchAddress("InterpolatedAmp", InterpolatedAmp, &b_InterpolatedAmp);
+   fChain->SetBranchAddress("t0_30", t0_30, &b_t0_30);
+   fChain->SetBranchAddress("t1_30", t1_30, &b_t1_30);
+   fChain->SetBranchAddress("tot_30", tot_30, &b_tot_30);
+   fChain->SetBranchAddress("t0CFD_20", t0CFD_20, &b_t0CFD_20);
+   fChain->SetBranchAddress("t1CFD_20", t1CFD_20, &b_t1CFD_20);
+   fChain->SetBranchAddress("totCFD_20", totCFD_20, &b_totCFD_20);
+   fChain->SetBranchAddress("triggerNumber", &triggerNumber, &b_triggerNumber);
+   fChain->SetBranchAddress("corruption", &corruption, &b_corruption);
+   fChain->SetBranchAddress("xIntercept", &xIntercept, &b_xIntercept);
+   fChain->SetBranchAddress("yIntercept", &yIntercept, &b_yIntercept);
+   fChain->SetBranchAddress("xSlope", &xSlope, &b_xSlope);
+   fChain->SetBranchAddress("ySlope", &ySlope, &b_ySlope);
+   fChain->SetBranchAddress("x_dut", x_dut, &b_x_dut);
+   fChain->SetBranchAddress("y_dut", y_dut, &b_y_dut);
+   fChain->SetBranchAddress("chi2", &chi2, &b_chi2);
+   fChain->SetBranchAddress("ntracks", &ntracks, &b_ntracks);
    Notify();
 }
 
